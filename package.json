@@ -1,0 +1,22 @@
+{
+  "name": "05-slidev-frontend",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "slidev build",
+    "dev": "slidev --open",
+    "export": "slidev export --per-slide --format pdf",
+    "export:hq": "slidev export --per-slide --scale 3",
+    "export:slides": "slidev export --format png"
+  },
+  "dependencies": {
+    "@slidev/cli": "^51.4.0",
+    "@slidev/theme-default": "latest",
+    "@slidev/theme-seriph": "latest",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "prettier": "^3.7.4",
+    "prettier-plugin-slidev": "^1.0.5"
+  }
+}
