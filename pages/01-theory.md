@@ -624,17 +624,13 @@ layout: center
 # Install caveman in One Line
 
 ```bash
-# macOS / Linux / WSL / Git Bash
-curl -fsSL https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.sh | bash
-
-# Windows (PowerShell)
-irm https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.ps1 | iex
+npx skills add https://github.com/juliusbrussee/caveman --skill caveman
 ```
 
 <v-clicks>
 
-- Detects 30+ agents (Claude Code, Codex, Cursor, Windsurf, Cline, Copilot, Continue, ...) and installs each
-- Pass `--all` to also drop per-repo rule files (`.cursor/rules/caveman.mdc`, `AGENTS.md` rules) into the current directory
+- Installs the `caveman` skill directly into the current agent skill environment
+- Works well for Cursor / Agent Skills based workshop setup
 - Trigger with `/caveman` (or `$caveman` for Codex) — turn off with "stop caveman" / "normal mode"
 - Levels: **Lite** / **Full** / **Ultra** / **Wenyan** (Classical Chinese, a highly token-efficient written language).
 

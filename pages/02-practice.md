@@ -121,19 +121,15 @@ layout: center
 # 2.1 One-Line Install
 
 ```bash
-# macOS / Linux / WSL / Git Bash
-curl -fsSL https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.sh | bash
-
-# Windows (PowerShell)
-irm https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.ps1 | iex
+npx skills add https://github.com/juliusbrussee/caveman --skill caveman
 ```
 
 <v-clicks>
 
-- Detects 30+ agents — installs the appropriate skill / plugin / extension for each
-- Defaults: Claude Code hooks + statusline + `caveman-shrink` MCP proxy
-- Add `--all` to also drop per-repo `.cursor/rules/caveman.mdc`, `.github/copilot-instructions.md`, `AGENTS.md` rules
-- Add `--minimal` to skip the extras and just install the plugin/extension.
+- Installs the `caveman` skill directly into the current Agent Skills environment
+- Keeps the workshop setup simple and consistent with the other `npx skills add` commands
+- No shell pipe, no PowerShell-specific branch, no extra installer flags
+- After install, reload or start a fresh agent session if the skill is not immediately visible.
 
 </v-clicks>
 
@@ -280,7 +276,7 @@ claude plugin install figma@claude-plugins-official
 - `shadcn` is now standard setup, not an optional afterthought
 - `context7` gives fresh docs for Next.js 16, React 19, Tailwind v4, shadcn
 - `filesystem` is scoped to the four frontend directories
-- If caveman was installed with defaults, `caveman-shrink` can compress MCP tool descriptions.
+- Caveman is already installed before MCP setup, so the agent can stay terse while inspecting tool descriptions.
 
 </v-clicks>
 
