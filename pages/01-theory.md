@@ -35,10 +35,10 @@ layout: center
 > AI frontend has moved from **"chat writes a component"** to **"agent ships a screen"**.
 
 ```text
-2023        Autocomplete             dopisuje рядок
-2024        Chat                     генерує шматок коду
-2025        Agent in IDE             редагує файли, запускає команди
-2026        MCP-enabled agent        читає Figma, registry, GitHub, browser
+2023        Autocomplete             completes a line
+2024        Chat                     generates a code snippet
+2025        Agent in IDE             edits files, runs commands
+2026        MCP-enabled agent        reads Figma, registry, GitHub, browser
 2026 (next) Team workflow            rules + skills + hooks + CI + security review
 ```
 
@@ -166,8 +166,8 @@ layout: center
 # The Five MCPs That Matter for Frontend
 
 ```text
-Figma MCP            → дизайн-контекст (frame, tokens, Code Connect)
-shadcn MCP           → компоненти, blocks, registries
+Figma MCP            → design context (frame, tokens, Code Connect)
+shadcn MCP           → components, blocks, registries
 Next.js DevTools MCP → routing / cache / browser logs / stack traces
 GitHub MCP           → issues, PRs, diff, releases
 Playwright MCP       → browser QA / visual check
@@ -636,7 +636,7 @@ irm https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.ps1 | i
 - Detects 30+ agents (Claude Code, Codex, Cursor, Windsurf, Cline, Copilot, Continue, ...) and installs each
 - Pass `--all` to also drop per-repo rule files (`.cursor/rules/caveman.mdc`, `AGENTS.md` rules) into the current directory
 - Trigger with `/caveman` (or `$caveman` for Codex) — turn off with "stop caveman" / "normal mode"
-- Levels: **Lite** / **Full** / **Ultra** / **文言文** (Classical Chinese, the most token-efficient written language ever invented).
+- Levels: **Lite** / **Full** / **Ultra** / **Wenyan** (Classical Chinese, a highly token-efficient written language).
 
 </v-clicks>
 

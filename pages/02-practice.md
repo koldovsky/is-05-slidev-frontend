@@ -145,7 +145,7 @@ irm https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.ps1 | i
 /caveman           # default = Full
 /caveman lite      # drop filler, keep grammar
 /caveman ultra     # telegraphic, abbreviate everything
-/caveman wenyan    # 文言文 — Classical Chinese, the most token-efficient written language
+/caveman wenyan    # Wenyan — Classical Chinese compression mode
 
 # Stop:
 "normal mode"  or  "stop caveman"
