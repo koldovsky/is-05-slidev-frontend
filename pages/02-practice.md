@@ -42,7 +42,24 @@ is-05-frontend/
 layout: center
 ---
 
-# Step 1: Bootstrap the Project (~5 min)
+# Setup Phase
+
+Install and initialize everything **before** the PRD, DESIGN.md, or implementation prompts
+
+<v-clicks>
+
+- Make the agent faster and better **before** it reads project context
+- Install the project, caveman, Vercel frontend skills, and MCPs first
+- Then sanity-check: caveman on, MCP panel green, skills available
+- Only after that do we give the agent `docs/prd.md`, `docs/DESIGN.md`, and Figma frames.
+
+</v-clicks>
+
+---
+layout: center
+---
+
+# Step 1: Bootstrap Next.js + Tailwind v4 (~5 min)
 
 ---
 
@@ -97,11 +114,266 @@ cat package.json | grep -E "next|react|tailwind"
 layout: center
 ---
 
-# Step 2: Wire the Agent Context (~10 min)
+# Step 2: Install caveman (~5 min)
 
 ---
 
-# 2.1 Add `AGENTS.md`
+# 2.1 One-Line Install
+
+```bash
+# macOS / Linux / WSL / Git Bash
+curl -fsSL https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.sh | bash
+
+# Windows (PowerShell)
+irm https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.ps1 | iex
+```
+
+<v-clicks>
+
+- Detects 30+ agents — installs the appropriate skill / plugin / extension for each
+- Defaults: Claude Code hooks + statusline + `caveman-shrink` MCP proxy
+- Add `--all` to also drop per-repo `.cursor/rules/caveman.mdc`, `.github/copilot-instructions.md`, `AGENTS.md` rules
+- Add `--minimal` to skip the extras and just install the plugin/extension.
+
+</v-clicks>
+
+---
+
+# 2.2 Trigger and Levels
+
+```text
+/caveman           # default = Full
+/caveman lite      # drop filler, keep grammar
+/caveman ultra     # telegraphic, abbreviate everything
+/caveman wenyan    # 文言文 — Classical Chinese, the most token-efficient written language
+
+# Stop:
+"normal mode"  or  "stop caveman"
+```
+
+<v-clicks>
+
+- Caveman only affects **output** — thinking/reasoning tokens are untouched
+- Code, URLs, paths, identifiers stay byte-for-byte identical
+- For a frontend session: try `/caveman lite` for paired programming, `/caveman ultra` for batch refactors.
+
+</v-clicks>
+
+---
+
+# 2.3 Caveman Skills Worth Knowing
+
+| Skill | What |
+|-------|------|
+| `/caveman-commit` | Conventional Commits, ≤50-char subject. Why over what. |
+| `/caveman-review` | One-line PR comments: `L42: 🔴 bug: user null. Add guard.` |
+| `/caveman:compress <file>` | Rewrites a memory file (e.g. `CLAUDE.md`) into caveman-speak. ~46% input savings every session. |
+| `/caveman-stats` | Real session token usage + estimated savings + USD. |
+| `caveman-shrink` MCP | Wraps any MCP server, compresses `tools/list` descriptions on the fly. |
+
+<v-click>
+
+Try this on `AGENTS.md` of the assignment repo: `/caveman:compress AGENTS.md` → backup as `AGENTS.original.md`, ~46% smaller.
+
+</v-click>
+
+---
+layout: center
+---
+
+# Step 3: Install Vercel Frontend Skills (~5 min)
+
+---
+
+# 3.1 Two Skills Worth Installing First
+
+```bash
+npx skills add vercel-labs/agent-skills \
+    --path skills/react-best-practices/SKILL.md \
+    --as vercel-react-best-practices
+
+npx skills add vercel-labs/agent-skills \
+    --path skills/web-design-guidelines/SKILL.md \
+    --as web-design-guidelines
+```
+
+<v-clicks>
+
+- `vercel-react-best-practices` — 70 rules across 8 categories (waterfalls, bundle size, server performance, re-renders, ...) tagged for AI agents
+- `web-design-guidelines` — review files for compliance with Vercel's Web Interface Guidelines (accessibility, focus rings, contrast, ...)
+- Both land in `.agents/skills/` and get pinned in `skills-lock.json` — reproducible across machines.
+
+</v-clicks>
+
+---
+
+# 3.2 Use the Skills
+
+```text
+Use the vercel-react-best-practices skill.
+Refactor components/sections/Pricing.tsx for re-render and bundle hygiene.
+Apply only CRITICAL and HIGH-priority rules.
+```
+
+```text
+Use the web-design-guidelines skill on app/page.tsx and components/sections/*.tsx.
+Output findings in file:line format.
+```
+
+<v-clicks>
+
+- Skills become **slash-commands or named references** — the agent loads them on demand
+- Pin versions via `skills-lock.json` so the same skill produces the same review on CI
+- Add more skills later (`accessibility-audit`, `cls-fixer`, your own `is-05-component-rules`, ...).
+
+</v-clicks>
+
+---
+layout: center
+---
+
+# Step 4: Wire MCPs (~10 min)
+
+---
+
+# 4.1 Install the Figma Plugin
+
+```bash
+# In Cursor:
+/add-plugin figma
+
+# In Claude Code:
+claude plugin install figma@claude-plugins-official
+```
+
+<v-clicks>
+
+- The official plugin ships Figma MCP config, implementation skills, Code Connect, and design-system rules
+- Works for Figma Design, Figma Make, and FigJam
+- Install it now, before any PRD or Figma URL enters the agent context.
+
+</v-clicks>
+
+---
+
+# 4.2 Add shadcn + Context MCPs
+
+```json
+{
+  "mcpServers": {
+    "shadcn": { "command": "npx", "args": ["-y", "shadcn@4.7.0", "mcp"] },
+    "context7": { "command": "npx", "args": ["-y", "@upstash/context7-mcp"] },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem@2025.10.20",
+        "./app", "./components", "./public", "./docs"
+      ]
+    }
+  }
+}
+```
+
+<v-clicks>
+
+- `shadcn` is now standard setup, not an optional afterthought
+- `context7` gives fresh docs for Next.js 16, React 19, Tailwind v4, shadcn
+- `filesystem` is scoped to the four frontend directories
+- If caveman was installed with defaults, `caveman-shrink` can compress MCP tool descriptions.
+
+</v-clicks>
+
+---
+
+# 4.3 Use shadcn From Chat
+
+```text
+Use shadcn MCP.
+Show me available landing-page hero blocks.
+Install the one closest to a centered hero with a single CTA.
+Adapt it to use figmaland-primary tokens and Graphik typography from DESIGN.md.
+```
+
+<v-clicks>
+
+- The agent fetches block metadata from the registry
+- Picks a candidate, installs it into `components/`
+- Re-themes it through your tokens — no inline hex
+- You review the diff, accept or refine.
+
+</v-clicks>
+
+---
+layout: center
+---
+
+# Step 5: Sanity Check the Agent (~3 min)
+
+---
+
+# 5.1 Before You Write PRD
+
+```text
+/caveman lite
+
+Use the vercel-react-best-practices skill.
+Summarize only the top 5 rules that matter for this project.
+
+Use context7 MCP.
+Look up the current Next.js App Router docs and tell me what changed in Next.js 16.
+```
+
+<v-clicks>
+
+- Caveman mode is active before the expensive context begins
+- Skills can be loaded on demand
+- MCP panel is green for Figma, shadcn, context7, filesystem
+- The agent has current docs and the right tool surface **before** it reads `docs/prd.md`.
+
+</v-clicks>
+
+---
+
+# 5.2 Green-Light Checklist
+
+<v-clicks>
+
+- `npm run dev` opens `http://localhost:3000`
+- `/caveman lite` works and responses get noticeably shorter
+- `.agents/skills/` contains `vercel-react-best-practices` and `web-design-guidelines`
+- Cursor MCP panel shows Figma / shadcn / context7 / filesystem as available
+- Filesystem MCP roots are limited to `./app`, `./components`, `./public`, `./docs`
+- No `.env`, `.cursor/mcp.json`, or Figma tokens are committed.
+
+</v-clicks>
+
+---
+layout: center
+---
+
+# Context Phase
+
+Now tell the already-prepared agent about **this** project
+
+<v-clicks>
+
+- `AGENTS.md` and `CLAUDE.md` define engineering rules
+- `docs/prd.md` defines product intent and Figma URLs
+- `docs/DESIGN.md` defines visual truth
+- `app/globals.css` turns that visual truth into Tailwind v4 tokens.
+
+</v-clicks>
+
+---
+layout: center
+---
+
+# Step 6: Wire the Agent Context (~10 min)
+
+---
+
+# 6.1 Add `AGENTS.md`
 
 ```md
 <!-- AGENTS.md -->
@@ -129,7 +401,7 @@ Reference @docs/prd.md
 
 ---
 
-# 2.2 Add `docs/prd.md` (Product Intent)
+# 6.2 Add `docs/prd.md` (Product Intent)
 
 ```md
 <!-- docs/prd.md -->
@@ -153,8 +425,14 @@ https://www.figma.com/design/tBwJlpl5o5mWdQHEQqAaa5/.../?node-id=65-122
 </v-clicks>
 
 ---
+layout: center
+---
 
-# 2.3 Add `docs/DESIGN.md` (Visual Source of Truth)
+# Step 7: Add `docs/DESIGN.md` (~5 min)
+
+---
+
+# 7.1 Add `docs/DESIGN.md` (Visual Source of Truth)
 
 The Figmaland demo extracts the design system into a real `DESIGN.md` (excerpt):
 
@@ -189,14 +467,40 @@ This file is what the agent reads when you say _"make a hero matching DESIGN.md"
 </v-click>
 
 ---
+
+# 7.2 Drive Figma With the PRD URL
+
+```text
+Use figma-implement-design.
+
+Source of truth:
+https://www.figma.com/design/tBwJlpl5o5mWdQHEQqAaa5/.../?node-id=65-122
+
+Constraints:
+- Read docs/prd.md and docs/DESIGN.md before any edit.
+- Use existing components in components/sections and components/ui first.
+- Tailwind v4 tokens only — no inline hex colors.
+- Plan first. Do not edit files until I say "go".
+```
+
+<v-clicks>
+
+- This happens **after** setup and after PRD/DESIGN.md exist
+- The agent calls Figma MCP to fetch the scoped frame
+- Cross-references project intent, visual tokens, and existing components
+- Returns a plan before touching files.
+
+</v-clicks>
+
+---
 layout: center
 ---
 
-# Step 3: Turn DESIGN.md into Real Tokens (~10 min)
+# Step 8: Turn DESIGN.md into Real Tokens (~10 min)
 
 ---
 
-# 3.1 Tailwind v4 — `app/globals.css`
+# 8.1 Tailwind v4 — `app/globals.css`
 
 ```css
 @import "tailwindcss";
@@ -225,7 +529,7 @@ layout: center
 
 ---
 
-# 3.2 Bridge Tokens into Tailwind v4 — `@theme inline`
+# 8.2 Bridge Tokens into Tailwind v4 — `@theme inline`
 
 ```css
 @theme inline {
@@ -255,7 +559,7 @@ The agent can now write `bg-figmaland-primary`, `rounded-figmaland-button`, `tex
 
 ---
 
-# 3.3 Optional: Semantic Component Classes
+# 8.3 Optional: Semantic Component Classes
 
 ```css
 @layer components {
@@ -284,116 +588,19 @@ These shortcut classes give the agent a **semantic name** to reach for (`figmala
 layout: center
 ---
 
-# Step 4: Install Vercel Frontend Skills (~5 min)
+# Implementation Phase
 
----
-
-# 4.1 Two Skills Worth Installing First
-
-```bash
-npx skills add vercel-labs/agent-skills \
-    --path skills/react-best-practices/SKILL.md \
-    --as vercel-react-best-practices
-
-npx skills add vercel-labs/agent-skills \
-    --path skills/web-design-guidelines/SKILL.md \
-    --as web-design-guidelines
-```
-
-<v-clicks>
-
-- `vercel-react-best-practices` — 70 rules across 8 categories (waterfalls, bundle size, server performance, re-renders, ...) tagged for AI agents
-- `web-design-guidelines` — review files for compliance with Vercel's Web Interface Guidelines (accessibility, focus rings, contrast, ...)
-- Both land in `.agents/skills/` and get pinned in `skills-lock.json` — reproducible across machines.
-
-</v-clicks>
-
----
-
-# 4.2 Use the Skills
-
-```text
-Use the vercel-react-best-practices skill.
-Refactor components/sections/Pricing.tsx for re-render and bundle hygiene.
-Apply only CRITICAL and HIGH-priority rules.
-```
-
-```text
-Use the web-design-guidelines skill on app/page.tsx and components/sections/*.tsx.
-Output findings in file:line format.
-```
-
-<v-clicks>
-
-- Skills become **slash-commands or named references** — the agent loads them on demand
-- Pin versions via `skills-lock.json` so the same skill produces the same review on CI
-- Add more skills later (`accessibility-audit`, `cls-fixer`, your own `is-05-component-rules`, ...).
-
-</v-clicks>
+Now we can inspect, implement, verify, and PR
 
 ---
 layout: center
 ---
 
-# Step 5: Connect Figma MCP (~10 min)
+# Step 9: Walk the Reference Code (~15 min)
 
 ---
 
-# 5.1 Install the Figma Plugin
-
-```bash
-# In Cursor:
-/add-plugin figma
-
-# In Claude Code:
-claude plugin install figma@claude-plugins-official
-```
-
-<v-clicks>
-
-- The official plugin ships:
-  - Figma **MCP config** (no manual JSON editing)
-  - **Skills**: `figma-implement-design`, `figma-generate-design`, `figma-use`, `figma-use-figjam`, `figma-code-connect`
-  - **Design-system rules** for variants, tokens, accessibility
-- Works for Figma Design, Figma Make, FigJam.
-
-</v-clicks>
-
----
-
-# 5.2 Drive It With a Figma URL
-
-```text
-Use figma-implement-design.
-
-Source of truth:
-https://www.figma.com/design/tBwJlpl5o5mWdQHEQqAaa5/.../?node-id=65-122
-
-Constraints:
-- Read DESIGN.md before any edit.
-- Use existing components in components/sections and components/ui first.
-- Tailwind v4 tokens only — no inline hex colors.
-- Plan first. Do not edit files until I say "go".
-```
-
-<v-clicks>
-
-- The agent calls Figma MCP to fetch the **scoped frame**
-- Cross-references `DESIGN.md` and the existing components
-- Returns a plan of "I will create / edit these files, with these props"
-- Only after you say "go" does it edit anything.
-
-</v-clicks>
-
----
-layout: center
----
-
-# Step 6: Walk the Reference Code (~15 min)
-
----
-
-# 6.1 `app/page.tsx` — Just a Composition
+# 9.1 `app/page.tsx` — Just a Composition
 
 ```tsx
 import { Hero } from "@/components/sections/Hero";
@@ -424,7 +631,7 @@ export default function Home() {
 
 ---
 
-# 6.2 `components/ui/Button.tsx` — Token-Driven Primitive
+# 9.2 `components/ui/Button.tsx` — Token-Driven Primitive
 
 ```tsx
 const baseClasses =
@@ -452,7 +659,7 @@ const variantClasses: Record<Variant, string> = {
 
 ---
 
-# 6.3 `components/sections/Hero.tsx` — Tokens + Responsive
+# 9.3 `components/sections/Hero.tsx` — Tokens + Responsive
 
 ```tsx
 export function Hero() {
@@ -487,7 +694,7 @@ Mobile sizes (`text-[44px]`) gracefully scale up to the desktop token (`md:text-
 
 ---
 
-# 6.4 `components/sections/Pricing.tsx` — Highlighted Variant
+# 9.4 `components/sections/Pricing.tsx` — Highlighted Variant
 
 ```tsx
 const isHighlighted = plan.highlighted;
@@ -506,7 +713,7 @@ const descriptionColor= isHighlighted ? "text-white" : "text-figmaland-muted";
 
 ---
 
-# 6.5 `components/sections/Newsletter.tsx` — Inline SVG Illustration
+# 9.5 `components/sections/Newsletter.tsx` — Inline SVG Illustration
 
 ```tsx
 function NewsletterIllustration({ className = "" }) {
@@ -531,7 +738,7 @@ function NewsletterIllustration({ className = "" }) {
 
 ---
 
-# 6.6 `components/ui/BurgerMenu.tsx` — A Real Client Component
+# 9.6 `components/ui/BurgerMenu.tsx` — A Real Client Component
 
 ```tsx
 "use client";
@@ -566,137 +773,11 @@ export function BurgerMenu({ links, ... }: Props) {
 layout: center
 ---
 
-# Step 7: Install caveman (~5 min)
+# Step 10: Verify Everything (~5 min)
 
 ---
 
-# 7.1 One-Line Install
-
-```bash
-# macOS / Linux / WSL / Git Bash
-curl -fsSL https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.sh | bash
-
-# Windows (PowerShell)
-irm https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.ps1 | iex
-```
-
-<v-clicks>
-
-- Detects 30+ agents — installs the appropriate skill / plugin / extension for each
-- Defaults: Claude Code hooks + statusline + `caveman-shrink` MCP proxy
-- Add `--all` to also drop per-repo `.cursor/rules/caveman.mdc`, `.github/copilot-instructions.md`, `AGENTS.md` rules
-- Add `--minimal` to skip the extras and just install the plugin/extension.
-
-</v-clicks>
-
----
-
-# 7.2 Trigger and Levels
-
-```text
-/caveman           # default = Full
-/caveman lite      # drop filler, keep grammar
-/caveman ultra     # telegraphic, abbreviate everything
-/caveman wenyan    # 文言文 — Classical Chinese, the most token-efficient written language
-
-# Stop:
-"normal mode"  or  "stop caveman"
-```
-
-<v-clicks>
-
-- Caveman only affects **output** — thinking/reasoning tokens are untouched
-- Code, URLs, paths, identifiers stay byte-for-byte identical
-- For a frontend session: try `/caveman lite` for paired programming, `/caveman ultra` for batch refactors.
-
-</v-clicks>
-
----
-
-# 7.3 Caveman Skills Worth Knowing
-
-| Skill | What |
-|-------|------|
-| `/caveman-commit` | Conventional Commits, ≤50-char subject. Why over what. |
-| `/caveman-review` | One-line PR comments: `L42: 🔴 bug: user null. Add guard.` |
-| `/caveman:compress <file>` | Rewrites a memory file (e.g. `CLAUDE.md`) into caveman-speak. ~46% input savings every session. |
-| `/caveman-stats` | Real session token usage + estimated savings + USD. |
-| `caveman-shrink` MCP | Wraps any MCP server, compresses `tools/list` descriptions on the fly. |
-
-<v-click>
-
-Try this on `AGENTS.md` of the assignment repo: `/caveman:compress AGENTS.md` → backup as `AGENTS.original.md`, ~46% smaller.
-
-</v-click>
-
----
-layout: center
----
-
-# Step 8: Wire shadcn MCP (Optional, ~10 min)
-
----
-
-# 8.1 Add to `.cursor/mcp.json`
-
-```json
-{
-  "mcpServers": {
-    "shadcn": {
-      "command": "npx",
-      "args": ["-y", "shadcn@4.7.0", "mcp"]
-    },
-    "context7": {
-      "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp"]
-    },
-    "filesystem": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-filesystem@2025.10.20",
-        "./app", "./components", "./public", "./docs"
-      ]
-    }
-  }
-}
-```
-
-<v-click>
-
-Filesystem MCP is **scoped** — agent cannot wander outside the four directories that matter for the page.
-
-</v-click>
-
----
-
-# 8.2 Use shadcn From Chat
-
-```text
-Use shadcn MCP.
-Show me available landing-page hero blocks.
-Install the one closest to a centered hero with a single CTA.
-Adapt it to use figmaland-primary tokens and Graphik typography from DESIGN.md.
-```
-
-<v-clicks>
-
-- The agent fetches block metadata from the registry
-- Picks a candidate, installs it into `components/`
-- Re-themes it through your tokens — no inline hex
-- You review the diff, accept or refine.
-
-</v-clicks>
-
----
-layout: center
----
-
-# Step 9: Verify Everything (~5 min)
-
----
-
-# 9.1 Local Smoke Test
+# 10.1 Local Smoke Test
 
 ```bash
 npm run dev           # → http://localhost:3000
@@ -716,7 +797,7 @@ npm run build         # → next build (Turbopack)
 
 ---
 
-# 9.2 Visual QA Loop
+# 10.2 Visual QA Loop
 
 ```text
 Use Playwright MCP.
@@ -743,13 +824,13 @@ layout: center
 <v-clicks>
 
 - **Bootstrapped** Next.js 16 + Tailwind v4 + TypeScript with `create-next-app`
-- **Wrote** `AGENTS.md`, `docs/prd.md`, `docs/DESIGN.md` — the three context layers
-- **Translated** `DESIGN.md` into real CSS variables + `@theme inline` Tailwind tokens
-- **Installed** `vercel-react-best-practices` and `web-design-guidelines` skills
-- **Connected** Figma MCP, optionally shadcn + filesystem + context7
+- **Installed first**: `caveman`, `vercel-react-best-practices`, `web-design-guidelines`, Figma MCP, shadcn MCP, context7, scoped filesystem MCP
+- **Sanity-checked** the agent before PRD: caveman active, MCP panel green, skills load correctly
+- **Wrote** `AGENTS.md` and `docs/prd.md` only after the setup phase
+- **Added** `docs/DESIGN.md` as the visual source of truth
+- **Translated** `DESIGN.md` into CSS variables + `@theme inline` Tailwind v4 tokens
 - **Walked through** Hero, Pricing, Newsletter, BurgerMenu — token-first, accessible, RSC-by-default
-- **Installed** `caveman` for ~75% smaller agent output and `caveman-shrink` for compressed MCP descriptions
 - **Verified** with lint, typecheck, build, and a Playwright visual QA loop
-- The agent now has a **complete frontend system** — not just a prompt.
+- The agent now has a **complete frontend system** — setup first, context second, implementation third.
 
 </v-clicks>
